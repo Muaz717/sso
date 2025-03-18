@@ -8,12 +8,19 @@ import (
 )
 
 type Config struct {
-	Env         string        `yaml:"env" env-default:"local"`
-	StoragePath string        `yaml:"storage_path" env-required:"true"`
-	TokenTTL    time.Duration `yaml:"token_ttl" env-required:"true"`
-	GRPC        GRPCConfig    `yaml:"grpc"`
+	Env      string        `yaml:"env" env-default:"local"`
+	TokenTTL time.Duration `yaml:"token_ttl" env-required:"true"`
+	DB       DBConfig      `yaml:"db"`
+	GRPC     GRPCConfig    `yaml:"grpc"`
 }
 
+type DBConfig struct {
+	Host       string `yaml:"host" env-required:"true"`
+	DBPort     string `yaml:"port" env-required:"true"`
+	Username   string `yaml:"username" env-required:"true"`
+	DBName     string `yaml:"dbname" env-required:"true"`
+	DBPassword string `yaml:"dbpassword" env-required:"true" env:"DB_PASSWORD"`
+}
 type GRPCConfig struct {
 	Port    int           `yaml:"port"`
 	Timeout time.Duration `yaml:"timeout"`

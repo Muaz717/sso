@@ -1,0 +1,11 @@
+version: "3"
+
+tasks:
+    migrations-up:
+      desc: Run migrations
+      cmds:
+        - go run ./cmd/migrator --migrations-path=./migrations --storage-path=postgres:qwerty@localhost:5432/sso_db --command=up
+    migrations-down:
+      desc: Rollback migrations
+      cmds:
+        - go run ./cmd/migrator --migrations-path=./migrations --storage-path=postgres:qwerty@localhost:5432/sso_db --command=down
