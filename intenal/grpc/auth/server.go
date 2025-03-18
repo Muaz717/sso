@@ -2,13 +2,16 @@ package auth
 
 import (
 	"context"
+	"errors"
 	ssov1 "github.com/Muaz717/protos_sso/gen/go/sso"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"sso/intenal/services/auth"
+	"sso/intenal/storage"
 )
 
-type Auth interface {
+type AuthSrv interface {
 	Login(
 		ctx context.Context,
 		email string,
@@ -25,10 +28,10 @@ type Auth interface {
 
 type serverApi struct {
 	ssov1.UnimplementedAuthServer
-	auth Auth
+	auth AuthSrv
 }
 
-func Register(gRPC *grpc.Server, auth Auth) {
+func Reg(gRPC *grpc.Server, auth AuthSrv) {
 	ssov1.RegisterAuthServer(gRPC, &serverApi{auth: auth})
 }
 
@@ -47,7 +50,10 @@ func (s *serverApi) Login(
 
 	token, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), int(req.GetAppId()))
 	if err != nil {
-		// TODO: ...
+		if errors.Is(err, auth.ErrInvalidCredentials) {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -65,7 +71,10 @@ func (s *serverApi) Register(
 
 	userID, err := s.auth.RegisterNewUser(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
-		// TODO: ...
+		if errors.Is(err, auth.ErrUserExists) {
+			return nil, status.Error(codes.AlreadyExists, err.Error())
+		}
+
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -83,6 +92,9 @@ func (s *serverApi) IsAdmin(
 
 	isAdmin, err := s.auth.IsAdmin(ctx, req.GetUserId())
 	if err != nil {
+		if errors.Is(err, storage.ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

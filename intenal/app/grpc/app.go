@@ -10,20 +10,22 @@ import (
 )
 
 type App struct {
-	log        *slog.Logger
-	gRPCServer *grpc.Server
-	port       int
+	log         *slog.Logger
+	gRPCServer  *grpc.Server
+	authService authgrpc.AuthSrv
+	port        int
 }
 
-func New(log *slog.Logger, port int) *App {
+func New(log *slog.Logger, port int, authService authgrpc.AuthSrv) *App {
 	gRPCServer := grpc.NewServer()
 
-	authgrpc.Register(gRPCServer)
+	authgrpc.Reg(gRPCServer, authService)
 
 	return &App{
-		log:        log,
-		gRPCServer: gRPCServer,
-		port:       port,
+		log:         log,
+		gRPCServer:  gRPCServer,
+		authService: authService,
+		port:        port,
 	}
 }
 

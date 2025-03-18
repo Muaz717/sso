@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -17,6 +18,11 @@ const (
 )
 
 func main() {
+
+	if err := godotenv.Load(); err != nil {
+		panic("failed to load .env file: " + err.Error())
+	}
+
 	cfg := config.MustLoad()
 
 	log := setupLogger(cfg.Env)
@@ -25,7 +31,7 @@ func main() {
 		slog.Any("config", cfg),
 	)
 
-	application := app.New(log, cfg.GRPC.Port, cfg.StoragePath, cfg.TokenTTL)
+	application := app.New(log, cfg.GRPC.Port, cfg.DB, cfg.TokenTTL)
 
 	go func() {
 		application.GRPCSrv.MustRun()

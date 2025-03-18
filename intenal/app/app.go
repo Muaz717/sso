@@ -1,8 +1,12 @@
 package app
 
 import (
+	"context"
 	"log/slog"
 	grpcapp "sso/intenal/app/grpc"
+	"sso/intenal/config"
+	"sso/intenal/services/auth"
+	"sso/intenal/storage/postgres"
 	"time"
 )
 
@@ -13,14 +17,17 @@ type App struct {
 func New(
 	log *slog.Logger,
 	grpcPort int,
-	storagePath string,
+	db config.DBConfig,
 	tokenTTL time.Duration,
 ) *App {
-	// TODO: init storage
+	storage, err := postgres.New(context.Background(), db)
+	if err != nil {
+		panic(err)
+	}
 
-	//TODO: init auth service
+	authService := auth.New(log, storage, storage, storage, tokenTTL)
 
-	grpcApp := grpcapp.New(log, grpcPort)
+	grpcApp := grpcapp.New(log, grpcPort, authService)
 
 	return &App{
 		GRPCSrv: grpcApp,
