@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -19,17 +18,11 @@ const (
 
 func main() {
 
-	if err := godotenv.Load(); err != nil {
-		panic("failed to load .env file: " + err.Error())
-	}
-
 	cfg := config.MustLoad()
 
 	log := setupLogger(cfg.Env)
 
-	log.Info("starting sso service",
-		slog.Any("config", cfg),
-	)
+	log.Info("starting sso service")
 
 	application := app.New(log, cfg.GRPC.Port, cfg.DB, cfg.TokenTTL)
 

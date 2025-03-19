@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 	"os"
 	"time"
 )
@@ -19,7 +20,7 @@ type DBConfig struct {
 	DBPort     string `yaml:"port" env-required:"true"`
 	Username   string `yaml:"username" env-required:"true"`
 	DBName     string `yaml:"dbname" env-required:"true"`
-	DBPassword string `yaml:"dbpassword" env-required:"true" env:"DB_PASSWORD"`
+	DBPassword string `yaml:"dbpassword" env:"DB_PASSWORD"`
 }
 type GRPCConfig struct {
 	Port    int           `yaml:"port"`
@@ -30,6 +31,10 @@ func MustLoad() *Config {
 	cfgPath := fetchConfigPath()
 	if cfgPath == "" {
 		panic("config path is required, but it is empty")
+	}
+
+	if err := godotenv.Load(); err != nil {
+		panic("failed to load .env file: " + err.Error())
 	}
 
 	return MustLoadByPath(cfgPath)
